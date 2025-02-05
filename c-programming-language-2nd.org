@@ -1,0 +1,130 @@
+#+title: C Programming Language
+#+property: header-args c :tangle no :mkdirp yes
+
+#+begin_src emacs-lisp :results none
+  (setq org-src-window-setup 'current-window)
+#+end_src
+
+* Utils
+
+#+name: getline.c
+#+begin_src c :results none :tangle code/utils/getline.c
+  #include <stdio.h>
+
+  int getline(char s[], int lim) {
+    int c, i;
+    i = 0;
+    while (--lim > 0 && (c = getchar()) != EOF && c != '\n') {
+      s[i++] = c;
+    }
+    if (c == '\n') {
+      s[i++] = c;  
+    }
+    s[i] = '\0';
+    return i;
+  }
+
+#+end_src
+
+* Chapter 4. Functions and Program Structure
+
+** Basics of Functions
+
+#+begin_src c :results none :tangle code/4.1/grep.c
+  #include <stdio.h>
+  #define MAXLINE 1000
+
+
+  int strindex(char source[], char searchfor[]);
+  int getline(char line[], int max);
+
+  char pattern[] = "ould";
+
+  int main() {
+    char line[MAXLINE];
+    int found = 0;
+    while (getline(line, MAXLINE) > 0) {
+      if (strindex(line, pattern) >= 0) {
+        printf("%s", line);
+        found++;
+      }
+    }
+    return found;
+  }
+
+  int strindex(char s[], char t[]) {
+    int i, j , k;
+    for (i = 0; s[i] != '\0'; i++) {
+      for (j = i, k = 0; t[k] != '\0' && s[j] == t[k]; j++, k++) {
+        
+      }
+      if (k > 0 && t[k] == '\0') {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+#+end_src
+
+#+begin_src shell :results none :tangle code/4.1/compile.ps1
+  gcc .\grep.c ..\utils\getline.c
+  Get-Content .\text.txt | .\a.exe
+#+end_src
+
+** Functions Returning Non-integers
+
+#+begin_src c :results none :tangle code/4.2/atof.c
+  #include <ctype.h>
+
+
+  double atof(char s[]) {
+    double val, power;
+    int i, sign;
+    for (i = 0; isspace(s[i]); i++) {
+      /* skip white space */
+    }
+    sign = (s[i] == '-') ? -1 : 1;
+    if (s[i] == '+' || s[i] == '-') {
+      i++;
+    }
+    for (val = 0.0; isdigit(s[i]); i++) {
+      val = 10.0 * val + (s[i] - '0');
+    }
+    if (s[i] == '.') {
+      i++;
+    }
+    for (power = 1.0; isdigit(s[i]); i++) {
+      val = 10.0 * val + (s[i] - '0');
+      power *= 10.0;
+    }
+    return sign * val / power;
+  }
+#+end_src
+
+#+begin_src c :results none :tangle code/4.2/main.c
+  #include <stdio.h>
+
+  #define MAXLINE 100
+
+  int main() {
+    double sum, atof(char[]);
+    char line[MAXLINE];
+    int getline(char line[], int max);
+
+    sum = 0;
+    while (getline(line, MAXLINE) > 0) {
+      printf("\t%g\n", sum += atof(line));
+    }
+    return 0;
+  }
+#+end_src
+
+#+begin_src shell :results none :tangle code/4.2/compile.ps1
+  gcc .\main.c .\atof.c ..\utils\getline.c
+#+end_src
+
+
+# Local Variables:
+# org-confirm-babel-evaluate: nil
+# End:
