@@ -126,19 +126,21 @@
 
 ** External Variables
 
-#+begin_src c :results none :tangle code/4.3/main.c
-  #include <stdio.h>
-  #include <stdlib.h>             /* for atof() */
-  #include <ctype.h>
-
-  #define MAXOP 100               /* max size of operand or operator */
+#+begin_src c :results none :tangle code/4.3/calc.h
   #define NUMBER '0'              /* signal that a number was found */
-
+  void push(double);
+  double pop(void);
   int getop(char []);
   int getch(void);
   void ungetch(int);
-  void push(double);
-  double pop(void);
+#+end_src
+
+#+begin_src c :results none :tangle code/4.3/main.c
+  #include <stdio.h>
+  #include <stdlib.h>             /* for atof() */
+  #include "calc.h"
+
+  #define MAXOP 100               /* max size of operand or operator */
 
   /* reverse Polish calculator */
   int main() {
@@ -178,29 +180,12 @@
     }
     return 0;
   }
+#+end_src
 
-  #define MAXVAL 100
-
-  int sp = 0;
-  double val[MAXVAL];
-
-  /* push: push f onto value stack */
-  void push(double f) {
-    if (sp < MAXVAL)
-      val[sp++] = f;
-    else
-      printf("error: stack full, can't push %g\n", f);
-  }
-
-  /* pop: pop and return top value from stack */
-  double pop(void) {
-    if (sp > 0)
-      return val[--sp];
-    else {
-      printf("error: stack empty\n");
-      return 0.0;
-    }
-  }
+#+begin_src c :results none :tangle code/4.3/getop.c
+  #include <stdio.h>
+  #include <ctype.h>
+  #include "calc.h"
 
   /* getop: get next operator or numberic operand */
   int getop(char s[]) {
@@ -225,7 +210,10 @@
       ungetch(c);
     return NUMBER;
   }
+#+end_src
 
+#+begin_src c :results none :tangle code/4.3/getch.c
+  #include <stdio.h>
   #define BUFSIZE 100
 
   char buf[BUFSIZE];
@@ -243,8 +231,43 @@
   }
 #+end_src
 
-#+begin_src shell
-  gcc -g .\main.c
+#+begin_src c :results none :tangle code/4.3/stack.c
+  #include <stdio.h>
+  #include "calc.h"
+
+  #define MAXVAL 100
+
+  int sp = 0;
+  double val[MAXVAL];
+
+  /* push: push f onto value stack */
+  void push(double f) {
+    if (sp < MAXVAL)
+      val[sp++] = f;
+    else
+      printf("error: stack full, can't push %g\n", f);
+  }
+
+  /* pop: pop and return top value from stack */
+  double pop(void) {
+    if (sp > 0)
+      return val[--sp];
+    else {
+      printf("error: stack empty\n");
+      return 0.0;
+    }
+  }
+#+end_src
+
+#+name: compile from powershell
+#+begin_src shell :results none :tangle code/4.3/compile.ps1
+  gcc -g .\main.c .\getop.c .\getch.c .\stack.c
+#+end_src
+
+#+name: compile from shell
+#+begin_src shell :results none :tangle code/4.3/compile.sh
+  #!/bin/bash
+  gcc -g main.c getop.c getch.c stack.c
 #+end_src
 
 After execute program, input and output will be like below.

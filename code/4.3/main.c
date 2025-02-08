@@ -1,15 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>             /* for atof() */
-#include <ctype.h>
+#include "calc.h"
 
 #define MAXOP 100               /* max size of operand or operator */
-#define NUMBER '0'              /* signal that a number was found */
-
-int getop(char []);
-int getch(void);
-void ungetch(int);
-void push(double);
-double pop(void);
 
 /* reverse Polish calculator */
 int main() {
@@ -48,67 +41,4 @@ int main() {
     }
   }
   return 0;
-}
-
-#define MAXVAL 100
-
-int sp = 0;
-double val[MAXVAL];
-
-/* push: push f onto value stack */
-void push(double f) {
-  if (sp < MAXVAL)
-    val[sp++] = f;
-  else
-    printf("error: stack full, can't push %g\n", f);
-}
-
-/* pop: pop and return top value from stack */
-double pop(void) {
-  if (sp > 0)
-    return val[--sp];
-  else {
-    printf("error: stack empty\n");
-    return 0.0;
-  }
-}
-
-/* getop: get next operator or numberic operand */
-int getop(char s[]) {
-  int i, c;
-  while((s[0] = c = getch()) == ' ' || c == '\t') {
-    /* skip */
-  }
-  s[1] = '\0';
-  if (!isdigit(c) && c != '.')
-    return c;                   /* not a number */
-  i = 0;
-  if (isdigit(c))
-    while (isdigit(s[++i] = c = getch())) {
-      /* collect integer part */
-    }
-  if (c == '.')
-    while (isdigit(s[++i] = c = getch())) {
-      /* collect fraction part */
-    }
-  s[i] = '\0';
-  if (c != EOF)
-    ungetch(c);
-  return NUMBER;
-}
-
-#define BUFSIZE 100
-
-char buf[BUFSIZE];
-int bufp = 0;
-
-int getch(void) {
-  return (bufp > 0) ? buf[--bufp] : getchar();
-}
-
-void ungetch(int c) {
-  if (bufp >= BUFSIZE)
-    printf("ungetch: too many characters\n");
-  else
-    buf[bufp++] = c;
 }
