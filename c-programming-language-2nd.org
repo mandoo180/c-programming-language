@@ -5,45 +5,25 @@
   (setq org-src-window-setup 'current-window)
 #+end_src
 
-* Utils
-
-#+name: getline.c
-#+begin_src c :results none :tangle code/utils/getline.c
-  #include <stdio.h>
-
-  int getline(char s[], int lim) {
-    int c, i;
-    i = 0;
-    while (--lim > 0 && (c = getchar()) != EOF && c != '\n') {
-      s[i++] = c;
-    }
-    if (c == '\n') {
-      s[i++] = c;  
-    }
-    s[i] = '\0';
-    return i;
-  }
-
-#+end_src
 
 * Chapter 4. Functions and Program Structure
 
 ** Basics of Functions
 
-#+begin_src c :results none :tangle code/4.1/grep.c
+#+begin_src c :results none :tangle code/4.1/src/grep.c
   #include <stdio.h>
   #define MAXLINE 1000
 
 
   int strindex(char source[], char searchfor[]);
-  int getline(char line[], int max);
+  int _getline(char line[], int max);
 
   char pattern[] = "ould";
 
   int main() {
     char line[MAXLINE];
     int found = 0;
-    while (getline(line, MAXLINE) > 0) {
+    while (_getline(line, MAXLINE) > 0) {
       if (strindex(line, pattern) >= 0) {
         printf("%s", line);
         found++;
@@ -65,16 +45,44 @@
     return -1;
   }
 
+  int _getline(char s[], int lim) {
+    int c, i;
+    i = 0;
+    while (--lim > 0 && (c = getchar()) != EOF && c != '\n') {
+      s[i++] = c;
+    }
+    if (c == '\n') {
+      s[i++] = c;  
+    }
+    s[i] = '\0';
+    return i;
+  }
+
+
 #+end_src
 
-#+begin_src shell :results none :tangle code/4.1/compile.ps1
-  gcc .\grep.c ..\utils\getline.c
-  Get-Content .\text.txt | .\a.exe
+#+begin_src makefile :results none :tangle code/4.1/Makefile
+  CC = gcc
+  CFLAGS = -g -Wall -Werror -I./src
+  SRCS = src/grep.c
+  OBJS = $(SRCS:.c=.o)
+  TARGET = app
+
+  all: $(TARGET)
+
+  $(TARGET): $(OBJS)
+  	$(CC) -o $@ $^
+
+  %.o: %c
+  	$(CC) $(CFLAGS) -c %< -o $@
+
+  clean:
+  	rm -f $(OBJS) $(TARGET)
 #+end_src
 
 ** Functions Returning Non-integers
 
-#+begin_src c :results none :tangle code/4.2/atof.c
+#+begin_src c :results none :tangle code/4.2/src/atof.c
   #include <ctype.h>
 
 
@@ -102,7 +110,7 @@
   }
 #+end_src
 
-#+begin_src c :results none :tangle code/4.2/main.c
+#+begin_src c :results none :tangle code/4.2/src/main.c
   #include <stdio.h>
 
   #define MAXLINE 100
@@ -110,23 +118,51 @@
   int main() {
     double sum, atof(char[]);
     char line[MAXLINE];
-    int getline(char line[], int max);
+    int _getline(char line[], int max);
 
     sum = 0;
-    while (getline(line, MAXLINE) > 0) {
+    while (_getline(line, MAXLINE) > 0) {
       printf("\t%g\n", sum += atof(line));
     }
     return 0;
   }
+
+  int _getline(char s[], int lim) {
+    int c, i;
+    i = 0;
+    while (--lim > 0 && (c = getchar()) != EOF && c != '\n') {
+      s[i++] = c;
+    }
+    if (c == '\n') {
+      s[i++] = c;  
+    }
+    s[i] = '\0';
+    return i;
+  }
 #+end_src
 
-#+begin_src shell :results none :tangle code/4.2/compile.ps1
-  gcc .\main.c .\atof.c ..\utils\getline.c
+#+begin_src makefile :results none :tangle code/4.2/Makefile
+  CC = gcc
+  CFLAGS = -g -Wall -Werror -I./src
+  SRCS = src/main.c src/atof.c
+  OBJS = $(SRCS:.c=.o)
+  TARGET = app
+
+  all: $(TARGET)
+
+  $(TARGET): $(OBJS)
+  	$(CC) -o $@ $^
+
+  %.o: %c
+  	$(CC) $(CFLAGS) -c %< -o $@
+
+  clean:
+  	rm -f $(OBJS) $(TARGET)
 #+end_src
 
 ** External Variables
 
-#+begin_src c :results none :tangle code/4.3/calc.h
+#+begin_src c :results none :tangle code/4.3/src/calc.h
   #define NUMBER '0'              /* signal that a number was found */
   void push(double);
   double pop(void);
@@ -135,7 +171,7 @@
   void ungetch(int);
 #+end_src
 
-#+begin_src c :results none :tangle code/4.3/main.c
+#+begin_src c :results none :tangle code/4.3/src/main.c
   #include <stdio.h>
   #include <stdlib.h>             /* for atof() */
   #include "calc.h"
@@ -182,7 +218,7 @@
   }
 #+end_src
 
-#+begin_src c :results none :tangle code/4.3/getop.c
+#+begin_src c :results none :tangle code/4.3/src/getop.c
   #include <stdio.h>
   #include <ctype.h>
   #include "calc.h"
@@ -212,7 +248,7 @@
   }
 #+end_src
 
-#+begin_src c :results none :tangle code/4.3/getch.c
+#+begin_src c :results none :tangle code/4.3/src/getch.c
   #include <stdio.h>
   #define BUFSIZE 100
 
@@ -231,7 +267,7 @@
   }
 #+end_src
 
-#+begin_src c :results none :tangle code/4.3/stack.c
+#+begin_src c :results none :tangle code/4.3/src/stack.c
   #include <stdio.h>
   #include "calc.h"
 
@@ -259,15 +295,36 @@
   }
 #+end_src
 
-#+name: compile from powershell
-#+begin_src shell :results none :tangle code/4.3/compile.ps1
-  gcc -g .\main.c .\getop.c .\getch.c .\stack.c
-#+end_src
+#+begin_src makefile :results none :tangle code/4.3/Makefile
+  # Compiler
+  CC = gcc
 
-#+name: compile from shell
-#+begin_src shell :results none :tangle code/4.3/compile.sh
-  #!/bin/bash
-  gcc -g main.c getop.c getch.c stack.c
+  # Compiler flags
+  CFLAGS = -g -Wall -Werror -I./src
+
+  # Source files
+  SRCS = src/main.c src/getop.c src/getch.c src/stack.c
+
+  # Object files
+  OBJS = $(SRCS:.c=.o)
+
+  # Executable name
+  TARGET = app
+
+  # Default target
+  all: $(TARGET)
+
+  # Link object files to create the executable
+  $(TARGET): $(OBJS)
+  	$(CC) -o $@ $^
+
+  # Compile source files to objects files
+  %.o: %.c
+  	$(CC) $(CFLAGS) -c $< -o $@
+
+  # Clean target
+  clean:
+  	rm -f $(OBJS) $(TARGET)
 #+end_src
 
 After execute program, input and output will be like below.
